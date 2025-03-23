@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Job Applicants</title>
+</head>
+<body>
+    <h1>Applicants for Your Jobs</h1>
+    <button onclick="window.location.href='{{ url_for('employer_dashboard') }}'">Back to Dashboard</button>
+
+    {% if candidates %}
+        <ul>
+            {% for candidate in candidates %}
+                <li>{{ candidate[0] }} ({{ candidate[1] }}) - Applied for {{ candidate[2] }}</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No candidates have applied yet.</p>
+    {% endif %}
+
+</body>
+</html>

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Employer Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+        }
+        button {
+            display: block;
+            margin: 10px auto;
+            padding: 10px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            width: 220px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>Welcome, Employer</h1>
+
+    <button onclick="window.location.href='{{ url_for('view_applicants') }}'">View Job Applicants</button>
+    <button onclick="window.location.href='{{ url_for('post_job') }}'">Post a New Job</button>
+    <button onclick="window.location.href='{{ url_for('submit_complaint') }}'">Submit Complaint</button>
+
+</body>
+</html>

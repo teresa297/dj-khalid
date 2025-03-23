@@ -1,0 +1,19 @@
+<h2>Welcome, {{ session['username'] }}!</h2>
+
+<ul>
+    <li>
+        <button onclick="window.location.href='{{ url_for('add_skills') }}'">➕ Add Skills</button>
+    </li>
+    <li>
+        <button onclick="window.location.href='{{ url_for('update_resume') }}'">📄 Update Resume</button>
+    </li>
+    <li>
+        <button onclick="window.location.href='{{ url_for('submit_complaint') }}'">⚠️ Submit Complaint</button>
+    </li>
+</ul>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+        <p class="{{ category }}">{{ message }}</p>
+    {% endfor %}
+{% endwith %}

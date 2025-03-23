@@ -1,0 +1,12 @@
+<h2>Admin Login</h2>
+
+
+<form method="POST" action="{{ url_for('admin_login') }}">
+    <label>Username:</label>
+    <input type="text" name="admin_username" required>
+    
+    <label>Password:</label>
+    <input type="password" name="admin_password" required>
+    
+    <button type="submit">Login</button>
+</form>

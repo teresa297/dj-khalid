@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f4f4f4;
+        }
+        .header {
+            background: #007bff;
+            color: white;
+            padding: 15px;
+            text-align: center;
+        }
+        .container {
+            width: 80%;
+            margin: 20px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .card {
+            background: #ffffff;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+        }
+        .logout {
+            display: inline-block;
+            padding: 10px;
+            margin-top: 15px;
+            background: red;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        .logout:hover {
+            background: darkred;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h2>Admin Dashboard</h2>
+    </div>
+
+    <div class="container">
+        <h3>Welcome, Admin</h3>
+
+        <div class="card">
+            <h4>Total Users: {{ total_users }}</h4>
+        </div>
+
+        <div class="card">
+            <h4>Total Recruiters: {{ total_recruiters }}</h4>
+        </div>
+
+        <div class="card">
+            <h4>Total Candidates: {{ total_candidates }}</h4>
+        </div>
+
+        <div class="card">
+            <h4>Total Jobs Posted: {{ total_jobs }}</h4>
+        </div>
+
+        <div class="card">
+            <h4>Open Jobs: {{ open_jobs }}</h4>
+        </div>
+
+        <div class="card">
+            <h4>Total Applications: {{ total_applications }}</h4>
+        </div>
+
+        <div class="card">
+            <h4>Scheduled Interviews: {{ scheduled_interviews }}</h4>
+        </div>
+
+        <div class="card">
+            <h4>Recent Complaints</h4>
+            <ul>
+                {% for complaint in recent_complaints %}
+                    <li>{{ complaint }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <a href="{{ url_for('logout') }}" class="logout">Logout</a>
+    </div>
+
+</body>
+</html>
