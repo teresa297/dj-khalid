@@ -1,0 +1,48 @@
+
+
+{% block content %}
+<h2>Available Jobs</h2>
+
+<!-- Sorting options -->
+<form method="GET" action="{{ url_for('view_jobs') }}">
+    <label for="sort_by">Sort by:</label>
+    <select name="sort_by" id="sort_by" onchange="this.form.submit()">
+        <option value="date" {% if sort_by == 'date' %}selected{% endif %}>Newest</option>
+        <option value="salary" {% if sort_by == 'salary' %}selected{% endif %}>Salary</option>
+        <option value="title" {% if sort_by == 'title' %}selected{% endif %}>Title</option>
+    </select>
+</form>
+
+<!-- Job Listings -->
+<table border="1">
+    <tr>
+        <th>Title</th>
+        <th>Description</th>
+        <th>Type</th>
+        <th>Salary</th>
+        <th>Employer</th>
+        <th>Posted On</th>
+        <th>Action</th>
+    </tr>
+    {% for job in jobs %}
+    <tr>
+        <td>{{ job[1] }}</td>  <!-- Title -->
+        <td>{{ job[2] }}</td>  <!-- Description -->
+        <td>{{ job[3] }}</td>  <!-- Type -->
+        <td>₹{{ job[4] }}</td>  <!-- Salary -->
+        <td>{{ job[5] }}</td>  <!-- Employer -->
+        <td>{{ job[6] }}</td>  <!-- TimeOfPosting -->
+        <td>
+            <form action="{{ url_for('apply_job', job_id=job[0]) }}" method="POST">
+
+                <button type="submit" style="color: green; background: none; border: none; cursor: pointer;">
+                    Apply
+                </button>
+            </form>
+            
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% endblock %}

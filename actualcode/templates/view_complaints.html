@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>All Complaints</title>
+</head>
+<body>
+    <h1>All Complaints</h1>
+    <table border="1">
+        <tr>
+            <th>Complaint ID</th>
+            <th>User Type</th>
+            <th>User Name</th>
+            <th>Description</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
+        {% for complaint in complaints %}
+        <tr>
+            <td>{{ complaint[0] }}</td>  <!-- Complaint ID -->
+            <td>{{ complaint[2] }}</td>  <!-- User Type -->
+            <td>{{ complaint[3] }}</td>  <!-- User Name -->
+            <td>{{ complaint[4] }}</td>  <!-- Description -->
+            <td>{{ complaint[5] }}</td>  <!-- Status -->
+            <td>
+                <form method="POST">
+                    <input type="hidden" name="complaint_id" value="{{ complaint[0] }}">
+                    <select name="status">
+                        <option value="Pending" {% if complaint[5] == 'Pending' %}selected{% endif %}>Pending</option>
+                        <option value="In Progress" {% if complaint[5] == 'In Progress' %}selected{% endif %}>In Progress</option>
+                        <option value="Resolved" {% if complaint[5] == 'Resolved' %}selected{% endif %}>Resolved</option>
+                    </select>
+                    <button type="submit">Update</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    <br>
+    <button onclick="window.location.href='{{ url_for('admin_dashboard') }}'">Back to Dashboard</button>
+</body>
+</html>

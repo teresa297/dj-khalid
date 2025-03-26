@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matching Jobs</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+        }
+        h2 {
+            color: #333;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+        .no-jobs {
+            color: red;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        .back-btn {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        .back-btn:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Perfectly Matching Jobs</h2>
+    {% if perfect_match_jobs %}
+        <table>
+            <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Description</th>
+                <th>Type</th>
+                <th>Salary</th>
+                <th>Employer</th>
+                <th>Apply</th>
+            </tr>
+            {% for job in perfect_match_jobs %}
+            <tr>
+                <td>{{ job[0] }}</td>
+                <td>{{ job[1] }}</td>
+                <td>{{ job[2] }}</td>
+                <td>{{ job[3] }}</td>
+                <td>
+                    <a href="{{ url_for('apply_job', job_id=job[0]) }}" style="color: green;">Apply</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <p class="no-jobs">No perfect matches found.</p>
+    {% endif %}
+
+    <h2>Jobs Matching At Least One Skill</h2>
+    {% if partial_match_jobs %}
+        <table>
+            <tr>
+                <th>Job ID</th>
+                <th>Description</th>
+                <th>Type</th>
+                <th>Employer</th>
+            </tr>
+            {% for job in partial_match_jobs %}
+            <tr>
+                <td>{{ job[0] }}</td>
+                <td>{{ job[1] }}</td>
+                <td>{{ job[2] }}</td>
+                <td>{{ job[3] }}</td>
+                <td>
+                    <form action="{{ url_for('apply_job', job_id=job[0]) }}" method="POST">
+                        <button type="submit" style="color: green; background: none; border: none; cursor: pointer;">
+                            Apply
+                        </button>
+                    </form>
+                    
+                    
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <p class="no-jobs">No partial matches found.</p>
+    {% endif %}
+
+    <a href="{{ url_for('employee_dashboard') }}" class="back-btn">Back to Dashboard</a>
+
+</body>
+</html>

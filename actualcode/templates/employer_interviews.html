@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Scheduled Interviews</title>
+</head>
+<body>
+    <h1>Scheduled Interviews</h1>
+    <table border="1">
+        <tr>
+            <th>Candidate Name</th>
+            <th>Job Title</th>
+            <th>Scheduled Time</th>
+            <th>Mode</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
+        {% for interview in interviews %}
+        <tr>
+            <td>{{ interview[1] }}</td>  <!-- Candidate Name -->
+            <td>{{ interview[3] }}</td>  <!-- Job Title -->
+            <td>{{ interview[4] }}</td>  <!-- Scheduled Time -->
+            <td>{{ interview[5] }}</td>  <!-- Mode -->
+            <td>{{ interview[6] }}</td>  <!-- Interview Status -->
+            <td>
+                <form method="POST">
+                    <input type="hidden" name="user_id" value="{{ interview[0] }}">
+                    <input type="hidden" name="job_id" value="{{ interview[2] }}">
+                    <select name="status">
+                        <option value="Scheduled" {% if interview[6] == 'Scheduled' %}selected{% endif %}>Scheduled</option>
+                        <option value="Completed" {% if interview[6] == 'Completed' %}selected{% endif %}>Completed</option>
+                        <option value="Cancelled" {% if interview[6] == 'Cancelled' %}selected{% endif %}>Cancelled</option>
+                    </select>
+                    <button type="submit">Update</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

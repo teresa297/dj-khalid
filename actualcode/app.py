@@ -252,80 +252,6 @@ def register_employee():
 
 
 
-
-#@app.route('/login', methods=['POST'])
-
-"""@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if request.method == 'GET':
-        return render_template("login.html")  # Show the login page
-
-    conn = get_db_connection()
-    cursor = conn.cursor()
-
-    username = request.form.get('username')
-    password = request.form.get('password')
-
-    try:
-        # Fetch user details
-        cursor.execute("SELECT ID, UserType FROM User WHERE Username = %s AND Password = %s", (username, password))
-        user = cursor.fetchone()
-
-        if not user:  # If user does not exist
-            flash("Invalid username or password.", "danger")
-            return redirect(url_for('login'))
-
-        user_id, user_type = user
-        session['username'] = username
-        session['user_type'] = user_type
-        session['user_id'] = user_id  # Store user ID in session
-
-        # Redirect based on user type
-        if user_type == "Employer":
-            flash("Login successful!", "success")
-            return redirect(url_for('employer_dashboard'))
-
-        elif user_type == "Employee":
-            flash("Login successful!", "success")
-            return redirect(url_for('employee_dashboard'))
-
-        flash("Unauthorized user type.", "danger")
-        return redirect(url_for('login'))
-
-    finally:
-        cursor.close()
-        conn.close()  
-
-
-@app.route('/admin_login', methods=['GET', 'POST'])
-def admin_login():
-    if request.method == 'GET':
-        return render_template("admin_login.html")  # Admin login page
-
-    admin_username = request.form.get('admin_username')
-    admin_password = request.form.get('admin_password')
-
-    # Hardcoded admin credentials (Replace with database lookup if needed)
-    ADMIN_CREDENTIALS = {
-        "admin": "securepassword123"
-    }
-
-    if admin_username in ADMIN_CREDENTIALS and ADMIN_CREDENTIALS[admin_username] == admin_password:
-        session['admin'] = admin_username  # Store admin session
-        flash("Admin login successful!", "success")
-        return redirect(url_for('admin_dashboard'))
-
-    flash("Invalid admin credentials!", "danger")
-    return redirect(url_for('admin_login'))
-
-@app.route('/admin_dashboard')
-def admin_dashboard():
-    if 'admin' not in session:
-        flash("Unauthorized access!", "danger")
-        return redirect(url_for('admin_login'))
-
-    return render_template("admin_dashboard.html")  # Create this page"""
-
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'GET':
@@ -389,12 +315,10 @@ def admin_login():
 
 @app.route('/admin_dashboard')
 def admin_dashboard():
-    
     if 'username' not in session or session.get('user_type') != "admin":
         flash("Unauthorized access!", "danger")
         return redirect(url_for('admin_login'))
 
-    
     conn = get_db_connection()
     cursor = conn.cursor()
 
@@ -427,21 +351,157 @@ def admin_dashboard():
     scheduled_interviews = cursor.fetchone()[0]
 
     # Get recent complaints (last 5 complaints)
-    cursor.execute("SELECT Description FROM Complaint ORDER BY Complaint_ID DESC LIMIT 5")
-    recent_complaints = [row[0] for row in cursor.fetchall()]
+    cursor.execute("SELECT Complaint_ID, Description, Status FROM Complaint ORDER BY Complaint_ID DESC LIMIT 5")
+    recent_complaints = cursor.fetchall()
 
     cursor.close()
     conn.close()
 
-    return render_template('admin_dashboard.html',
-                           total_users=total_users,
-                           total_recruiters=total_recruiters,
-                           total_candidates=total_candidates,
-                           total_jobs=total_jobs,
-                           open_jobs=open_jobs,
-                           total_applications=total_applications,
-                           scheduled_interviews=scheduled_interviews,
-                           recent_complaints=recent_complaints)
+    return render_template("admin_dashboard.html", 
+                            total_users=total_users, 
+                            total_recruiters=total_recruiters, 
+                            total_candidates=total_candidates, 
+                            total_jobs=total_jobs, 
+                            open_jobs=open_jobs, 
+                            total_applications=total_applications, 
+                            scheduled_interviews=scheduled_interviews,
+                            recent_complaints=recent_complaints)
+
+
+@app.route('/view_users')
+def view_users():
+    if 'username' not in session or session.get('user_type') != "admin":
+        flash("Unauthorized access!", "danger")
+        return redirect(url_for('admin_login'))
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT ID, Username, UserType FROM User")
+    users = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+
+    return render_template("view_users.html", users=users)
+
+@app.route('/view_applicant_details/<int:cand_id>')
+def view_applicant_details(cand_id):
+    if 'username' not in session or session.get('user_type') != 'Employer':
+        flash("Unauthorized access!", "danger")
+        return redirect(url_for('index'))
+
+    conn = get_db_connection()
+    cursor = conn.cursor(buffered=True)
+
+    cursor.execute("""
+        SELECT U.ID, U.Name, U.Username, E.Email, E.resume, 
+               GROUP_CONCAT(DISTINCT S.Name SEPARATOR ', ') AS Skills, 
+               GROUP_CONCAT(DISTINCT A.Job_ID SEPARATOR ', ') AS Job_IDs,
+               GROUP_CONCAT(DISTINCT J.Title SEPARATOR ', ') AS Job_Titles
+        FROM User U
+        JOIN Employee E ON U.ID = E.ID
+        JOIN Application A ON E.ID = A.User_ID
+        JOIN Job J ON A.Job_ID = J.Job_ID
+        LEFT JOIN CandiSkill CS ON E.ID = CS.Cand_ID
+        LEFT JOIN Skill S ON CS.Skill_ID = S.skill_ID
+        WHERE U.ID = %s
+        GROUP BY U.ID;
+    """, (cand_id,))
+
+    applicant = cursor.fetchone()
+
+    cursor.close()
+    conn.close()
+
+    if not applicant:
+        flash("Applicant not found.", "warning")
+        return redirect(url_for('view_applicants'))
+
+    # Convert comma-separated strings to lists
+    job_ids = applicant[6].split(', ') if applicant[6] else []
+    job_titles = applicant[7].split(', ') if applicant[7] else []
+
+    return render_template("view_applicant_details.html", applicant=applicant, job_ids=job_ids, job_titles=job_titles, zip=zip)
+
+
+@app.route('/view_scheduled_interviews')
+def view_scheduled_interviews():
+    if 'username' not in session or session.get('user_type') != 'Employee':
+        flash("Unauthorized access!", "danger")
+        return redirect(url_for('index'))
+
+    user_id = session.get('user_id')  # Assuming user ID is stored in session
+
+    conn = get_db_connection()
+    cursor = conn.cursor(buffered=True)
+
+    cursor.execute("""
+        SELECT J.Title, I.Time, I.Mode, I.Status 
+        FROM Interview I
+        JOIN Job J ON I.Job_ID = J.Job_ID
+        WHERE I.User_ID = %s
+        ORDER BY I.Time ASC;
+    """, (user_id,))
+
+    interviews = cursor.fetchall()
+    cursor.close()
+    conn.close()
+
+    return render_template("view_scheduled_interviews.html", interviews=interviews)
+
+
+
+@app.route('/schedule_interview/<int:cand_id>/<int:job_id>', methods=['GET', 'POST'])
+def schedule_interview(cand_id, job_id):
+    if 'username' not in session or session.get('user_type') != 'Employer':
+        flash("Unauthorized access!", "danger")
+        return redirect(url_for('index'))
+    
+    print(f"Schedule Interview triggered for Candidate ID: {cand_id}, Job ID: {job_id}")
+
+    conn = get_db_connection()
+    cursor = conn.cursor(buffered=True)  # Use buffered cursor to avoid unread results error
+
+    # Check if an interview already exists
+    cursor.execute("""
+        SELECT COUNT(*) FROM Interview 
+        WHERE User_ID = %s AND Job_ID = %s
+    """, (cand_id, job_id))
+    
+    existing_interview = cursor.fetchone()  # Fetch result properly
+    if existing_interview and existing_interview[0] > 0:
+        flash("Interview already scheduled for this candidate and job.", "warning")
+        cursor.close()
+        conn.close()
+        return redirect(url_for('view_applicant_details', cand_id=cand_id))
+
+    if request.method == 'POST':
+        interview_time = request.form.get('time')
+        interview_mode = request.form.get('mode')
+
+        if not interview_time or not interview_mode:
+            flash("Please select a valid date, time, and mode.", "danger")
+        else:
+            cursor.execute("""
+                INSERT INTO Interview (User_ID, Job_ID, Time, Mode, Status) 
+                VALUES (%s, %s, %s, %s, 'Scheduled')
+            """, (cand_id, job_id, interview_time, interview_mode))
+
+            conn.commit()
+            flash("Interview scheduled successfully!", "success")
+
+        cursor.close()
+        conn.close()
+
+        return redirect(url_for('view_applicant_details', cand_id=cand_id))
+
+    cursor.close()
+    conn.close()
+
+    return render_template("schedule_interview.html", cand_id=cand_id, job_id=job_id)
+
+
 
 
 
@@ -463,61 +523,67 @@ def view_applicants():
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    emp_id = session.get('emp_id')
+    emp_id = session.get('user_id')
 
-    # Fetch candidates who applied to the employer’s jobs
+    # Fetch only jobs that have at least one applicant
     cursor.execute("""
-        SELECT U.Name, E.Email, E.resume 
-        FROM User U
-        JOIN Employee E ON U.ID = E.ID
-        JOIN Application A ON E.ID = A.User_ID
-        JOIN Job J ON A.Job_ID = J.Job_ID
+        SELECT J.job_id AS job_id, J.title AS job_title, U.ID AS cand_id, U.Name AS cand_name
+        FROM Job J
+        JOIN Application A ON J.Job_ID = A.Job_ID
+        JOIN Employee E ON A.User_ID = E.ID
+        JOIN User U ON E.ID = U.ID
         WHERE J.Emp_ID = %s
+        ORDER BY J.title, U.Name;
     """, (emp_id,))
-    
-    candidates = cursor.fetchall()
 
-    if not candidates:
-        flash("No applicants yet!", "warning")
-        return render_template("view_applicants.html", candidates=[])
-
+    results = cursor.fetchall()
     cursor.close()
     conn.close()
 
-    return render_template("view_applicants.html", candidates=candidates)
+    print("Fetched Results:", results)  
+
+    # Grouping candidates by job
+    jobs_with_candidates = {}
+    for job_id, job_title, cand_id, cand_name in results:
+        if job_id not in jobs_with_candidates:
+            jobs_with_candidates[job_id] = {
+                'title': job_title,
+                'candidates': []
+            }
+        jobs_with_candidates[job_id]['candidates'].append({'id': cand_id, 'name': cand_name})
+
+    return render_template("view_applicants.html", jobs=jobs_with_candidates)
 
 
-@app.route('/submit_complaint', methods=['POST'])
+@app.route('/submit_complaint', methods=['GET', 'POST'])
 def submit_complaint():
     if 'username' not in session:
         flash("Please log in first.", "danger")
         return redirect(url_for('login'))
 
-    user_id = session.get('user_id')  # Get logged-in user's ID
-    user_type = session.get('user_type')  # Get whether Employer or Employee
-    description = request.form.get('description')
+    user_id = session.get('user_id')
 
-    if not description:
-        flash("Complaint description cannot be empty!", "warning")
-        return redirect(url_for('dashboard'))  # Redirect to respective dashboard
+    conn = get_db_connection()
+    cursor = conn.cursor()
 
-    # Insert the complaint into the Complaint table
-    cursor.execute(
-        "INSERT INTO Complaint (Complainer_ID, Description) VALUES (%s, %s)", 
-        (user_id, description)
-    )
-    conn.commit()
+    if request.method == 'POST':  # Handling form submission
+        description = request.form.get('description')
+        if not description.strip():
+            flash("Complaint description cannot be empty!", "warning")
+        else:
+            cursor.execute("INSERT INTO Complaint (Complainer_ID, Description, Status) VALUES (%s, %s, %s)",
+                           (user_id, description, "Pending"))
+            conn.commit()
+            flash("Complaint submitted successfully!", "success")
 
-    flash("Complaint submitted successfully!", "success")
+    # Fetch user's complaints for display
+    cursor.execute("SELECT Complaint_ID, Description, Status FROM Complaint WHERE Complainer_ID = %s", (user_id,))
+    complaints = cursor.fetchall()
 
-    # Redirect user back to their respective dashboard
-    if user_type == "Employer":
-        return redirect(url_for('employer_dashboard'))
-    elif user_type == "Employee":
-        return redirect(url_for('employee_dashboard'))
-    else:
-        return redirect(url_for('login'))  # Fallback case
+    cursor.close()
+    conn.close()
 
+    return render_template("submit_complaint.html", complaints=complaints)
 
 
 
@@ -535,10 +601,11 @@ def post_job():
     skills = cursor.fetchall()  # List of (ID, Name)
 
     if request.method == 'POST':
-        emp_id = session.get('emp_id')
+        emp_id = session.get('user_id')
         salary = request.form.get('salary')
         description = request.form.get('description')
         locations = request.form.get('locations')
+        title = request.form.get('title')
         job_type = request.form.get('job_type')
         selected_skills = request.form.getlist('skills')  # List of skill IDs from the form
 
@@ -553,9 +620,9 @@ def post_job():
 
 
         # Insert the new job into the Job table
-        sql_job = """INSERT INTO Job (Emp_ID, Salary, Description, Locations, Type, TimeOfPosting, No_Apps, Status)
+        sql_job = """INSERT INTO Job (Emp_ID, Salary, Description, Locations,Title, Type, TimeOfPosting, No_Apps, Status)
                      VALUES (%s, %s, %s, %s, %s, NOW(), 0, 'Open')"""
-        values_job = (emp_id, salary, description, locations, job_type)
+        values_job = (emp_id, salary, description, locations,title, job_type)
 
         try:
             cursor.execute(sql_job, values_job)
@@ -581,6 +648,111 @@ def post_job():
     return render_template("post_job.html", skills=skills)
 
 
+@app.route('/view_jobs', methods=['GET'])
+def view_jobs():
+    if 'username' not in session or session.get('user_type') != 'Employee':
+        flash("Unauthorized access!", "danger")
+        return redirect(url_for('login'))
+
+    sort_by = request.args.get('sort_by', 'date')  # Default sorting by date posted
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    # Sorting logic with FIXED SQL syntax
+    if sort_by == 'salary':
+        cursor.execute("""
+            SELECT j.Job_ID, j.Title, j.Description, j.Type, j.Salary, u.Name AS Employer
+            FROM Job j
+            JOIN Employer e ON j.Emp_ID = e.ID
+            JOIN User u ON e.ID = u.ID
+            ORDER BY j.Salary DESC
+        """)
+    elif sort_by == 'title':
+        cursor.execute("""
+            SELECT j.Job_ID, j.Title, j.Description, j.Type, j.Salary, u.Name AS Employer
+            FROM Job j
+            JOIN Employer e ON j.Emp_ID = e.ID
+            JOIN User u ON e.ID = u.ID
+            ORDER BY j.Title ASC
+        """)
+    else:  # Default: Sort by newest jobs first
+        cursor.execute("""
+            SELECT j.Job_ID, j.Title, j.Description, j.Type, j.Salary,  u.Name AS Employer
+            FROM Job j
+            JOIN Employer e ON j.Emp_ID = e.ID
+            JOIN User u ON e.ID = u.ID
+            ORDER BY j.TimeOfPosting DESC
+        """)
+
+    jobs = cursor.fetchall()
+    cursor.close()
+    conn.close()
+
+    return render_template('view_jobs.html', jobs=jobs, sort_by=sort_by)
+
+
+
+
+@app.route('/matching_jobs', methods=['GET'])
+def matching_jobs():
+    if 'username' not in session or session.get('user_type') != 'Employee':
+        flash("Unauthorized access!", "danger")
+        return redirect(url_for('login'))
+
+    user_id = session.get('user_id')
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    # Fetch jobs matching all employee's skills
+    cursor.execute("""
+        SELECT j.Job_ID, j.Description, j.Type, u.Name AS Employer
+        FROM Job j
+        JOIN Employer e ON j.Emp_ID = e.ID
+        JOIN User u ON e.ID = u.ID
+        JOIN JobQuali jq ON j.Job_ID = jq.Job_ID
+        WHERE jq.Skill_ID IN (
+            SELECT cs.Skill_ID
+            FROM CandiSkill cs
+            WHERE cs.Cand_ID = %s
+        )
+        GROUP BY j.Job_ID
+        HAVING COUNT(DISTINCT jq.Skill_ID) = (
+            SELECT COUNT(DISTINCT cs.Skill_ID)
+            FROM CandiSkill cs
+            WHERE cs.Cand_ID = %s
+        );
+    """, (user_id, user_id))
+    perfect_match_jobs = cursor.fetchall()
+
+    # Fetch jobs matching at least one skill
+    cursor.execute("""
+        SELECT DISTINCT j.Job_ID, j.Description, j.Type, u.Name AS Employer
+        FROM Job j
+        JOIN Employer e ON j.Emp_ID = e.ID
+        JOIN User u ON e.ID = u.ID
+        JOIN JobQuali jq ON j.Job_ID = jq.Job_ID
+        WHERE jq.Skill_ID IN (
+            SELECT cs.Skill_ID
+            FROM CandiSkill cs
+            WHERE cs.Cand_ID = %s
+        );
+    """, (user_id,))
+    partial_match_jobs = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+
+    return render_template('matching_jobs.html',
+                           perfect_match_jobs=perfect_match_jobs,
+                           partial_match_jobs=partial_match_jobs)
+
+
+
+
+
+
+
 @app.route('/search_skills', methods=['GET'])
 def search_skills():
     query = request.args.get('query', '').strip()
@@ -599,26 +771,32 @@ def search_skills():
 
     return jsonify(skills)
 
-@app.route('/apply_job/<int:job_id>')
+@app.route('/apply_job/<int:job_id>', methods=['GET', 'POST'])
 def apply_job(job_id):
     if 'username' not in session or session.get('user_type') != 'Employee':
         flash("Unauthorized access!", "danger")
-        return redirect(url_for('index'))
+        return redirect(url_for('login'))
 
-    candidate_id = session.get('candidate_id')
+    user_id = session.get('user_id')
+
+    # Debugging step
+    if not user_id:
+        flash("Error: User ID not found in session.", "danger")
+        return redirect(url_for('view_jobs'))
 
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    # Check if the user already applied
-    cursor.execute("SELECT * FROM Application WHERE User_ID = %s AND Job_ID = %s", (candidate_id, job_id))
-    if cursor.fetchone():
-        flash("You have already applied for this job.", "warning")
+    # Check if the user has already applied for this job
+    cursor.execute("SELECT * FROM Application WHERE User_ID = %s AND Job_ID = %s", (user_id, job_id))
+    existing_application = cursor.fetchone()
+
+    if existing_application:
+        flash("You have already applied for this job!", "warning")
     else:
-        # Insert application with default status 'Applied'
-        cursor.execute("INSERT INTO Application (User_ID, Job_ID, Status) VALUES (%s, %s, 'Applied')", (candidate_id, job_id))
+        cursor.execute("INSERT INTO Application (User_ID, Job_ID, Status) VALUES (%s, %s, 'Applied')", (user_id, job_id))
         conn.commit()
-        flash("Applied successfully!", "success")
+        flash("Application submitted successfully!", "success")
 
     cursor.close()
     conn.close()
@@ -653,3 +831,106 @@ def logout():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
+
+@app.route('/admin/complaints', methods=['GET', 'POST'])
+def view_complaints():
+    if 'username' not in session or session.get('user_type') != 'admin':
+        flash("Unauthorized access!", "danger")
+        return redirect(url_for('login'))
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    # If form is submitted, update complaint status
+    if request.method == 'POST':
+        complaint_id = request.form.get('complaint_id')
+        new_status = request.form.get('status')
+
+        if complaint_id and new_status:
+            cursor.execute("UPDATE Complaint SET Status = %s WHERE Complaint_ID = %s", (new_status, complaint_id))
+            conn.commit()
+            flash("Complaint status updated successfully!", "success")
+
+    # Fetch all complaints with user details
+    cursor.execute("""
+        SELECT c.Complaint_ID, u.ID, u.UserType, u.Name, c.Description, c.Status 
+        FROM Complaint c 
+        JOIN User u ON c.complainer_ID = u.ID
+        ORDER BY c.Status DESC, c.Complaint_ID DESC
+    """)
+    complaints = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+
+    return render_template('view_complaints.html', complaints=complaints)
+
+
+@app.route('/employer/interviews', methods=['GET', 'POST'])
+def view_interviews():
+    if 'username' not in session or session.get('user_type') != 'Employer':
+        flash("Unauthorized access!", "danger")
+        return redirect(url_for('login'))
+
+    employer_id = session.get('user_id')
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    # If the employer submits an update to interview status
+    if request.method == 'POST':
+        user_id = request.form.get('user_id')
+        job_id = request.form.get('job_id')
+        new_status = request.form.get('status')
+
+        cursor.execute("""
+            UPDATE Interview 
+            SET Status = %s 
+            WHERE User_ID = %s AND Job_ID = %s
+        """, (new_status, user_id, job_id))
+        
+        conn.commit()
+        flash("Interview status updated successfully!", "success")
+
+    # Fetch all scheduled interviews for this employer
+    cursor.execute("""
+        SELECT i.User_ID, u.Name, j.Job_ID, j.Title, i.Time, i.Mode, i.Status
+        FROM Interview i
+        JOIN User u ON i.User_ID = u.ID
+        JOIN Job j ON i.Job_ID = j.Job_ID
+        WHERE j.Emp_ID = %s
+        ORDER BY i.Time ASC
+    """, (employer_id,))
+    
+    interviews = cursor.fetchall()
+
+    # Fetch all job postings by the employer
+    cursor.execute("SELECT Job_ID, Title, Status FROM Job WHERE Emp_ID = %s", (employer_id,))
+    jobs = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+
+    return render_template('employer_interviews.html', interviews=interviews, jobs=jobs)
+
+
+
+@app.route('/close_job/<int:job_id>', methods=['POST'])
+def close_job(job_id):
+    if 'username' not in session or session.get('user_type') != 'Employer':
+        flash("Unauthorized access!", "danger")
+        return redirect(url_for('login'))
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    # Update job status to 'Closed'
+    cursor.execute("UPDATE Jobs SET Status = 'Closed' WHERE Job_ID = %s", (job_id,))
+    conn.commit()
+
+    cursor.close()
+    conn.close()
+
+    flash("Job closed successfully!", "success")
+    return redirect(url_for('view_interviews'))
+

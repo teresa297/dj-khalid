@@ -31,6 +31,19 @@
             margin: 10px 0;
             border-radius: 5px;
             box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .card a {
+            text-decoration: none;
+            background: #007bff;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+        .card a:hover {
+            background: #0056b3;
         }
         .logout {
             display: inline-block;
@@ -40,6 +53,8 @@
             color: white;
             text-decoration: none;
             border-radius: 5px;
+            text-align: center;
+            width: 100%;
         }
         .logout:hover {
             background: darkred;
@@ -57,6 +72,7 @@
 
         <div class="card">
             <h4>Total Users: {{ total_users }}</h4>
+            <a href="{{ url_for('view_users') }}">View All</a>
         </div>
 
         <div class="card">
@@ -87,9 +103,10 @@
             <h4>Recent Complaints</h4>
             <ul>
                 {% for complaint in recent_complaints %}
-                    <li>{{ complaint }}</li>
+                    <li>{{ complaint[1] }} - <strong>Status:</strong> {{ complaint[2] }}</li>
                 {% endfor %}
             </ul>
+            <a href="{{ url_for('view_complaints') }}">Manage Complaints</a>
         </div>
 
         <a href="{{ url_for('logout') }}" class="logout">Logout</a>

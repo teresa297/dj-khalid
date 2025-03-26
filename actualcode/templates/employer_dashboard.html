@@ -27,10 +27,13 @@
 </head>
 <body>
     <h1>Welcome, Employer</h1>
+    <a href="{{ url_for('logout') }}" class="btn btn-danger" style="position: absolute; top: 20px; right: 20px;">Logout</a>
 
     <button onclick="window.location.href='{{ url_for('view_applicants') }}'">View Job Applicants</button>
     <button onclick="window.location.href='{{ url_for('post_job') }}'">Post a New Job</button>
     <button onclick="window.location.href='{{ url_for('submit_complaint') }}'">Submit Complaint</button>
+    <button onclick="window.location.href='{{ url_for('view_interviews') }}'">View interviews</button>
+
 
 </body>
 </html>

@@ -1,0 +1,23 @@
+<h2>Applicant Details</h2>
+<p><strong>Name:</strong> {{ applicant[1] }}</p>
+<p><strong>Email:</strong> {{ applicant[3] }}</p>
+<p><strong>Resume:</strong> <a href="{{ applicant[4] }}" target="_blank">Download</a></p>
+<p><strong>Skills:</strong> {{ applicant[5] }}</p>
+
+<h3>Applied Jobs</h3>
+{% if job_ids and job_titles %}
+    <ul>
+        {% for i in range(job_ids|length) %}
+            <li>
+                <strong>{{ job_titles[i] }}</strong> (Job ID: {{ job_ids[i] }})
+                <a href="{{ url_for('schedule_interview', cand_id=applicant[0], job_id=job_ids[i]) }}" class="btn btn-primary">
+                    Schedule Interview
+                </a>
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p class="text-danger">No jobs applied.</p>
+{% endif %}
+
+<a href="{{ url_for('view_applicants') }}">Back to Applicants</a>

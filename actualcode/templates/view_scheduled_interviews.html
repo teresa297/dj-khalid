@@ -1,0 +1,32 @@
+
+
+{% block content %}
+<h2>Your Scheduled Interviews</h2>
+
+{% if interviews %}
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Job Title</th>
+                <th>Date & Time</th>
+                <th>Mode</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for interview in interviews %}
+                <tr>
+                    <td>{{ interview[0] }}</td>
+                    <td>{{ interview[1] }}</td>
+                    <td>{{ interview[2] }}</td>
+                    <td>{{ interview[3] }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <p>No scheduled interviews.</p>
+{% endif %}
+
+<a href="{{ url_for('dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+{% endblock %}

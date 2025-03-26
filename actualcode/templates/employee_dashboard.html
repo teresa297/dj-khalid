@@ -1,14 +1,24 @@
 <h2>Welcome, {{ session['username'] }}!</h2>
+<a href="{{ url_for('logout') }}" class="btn btn-danger" style="position: absolute; top: 20px; right: 20px;">Logout</a>
 
 <ul>
     <li>
-        <button onclick="window.location.href='{{ url_for('add_skills') }}'">➕ Add Skills</button>
+        <button onclick="window.location.href='{{ url_for('add_skills') }}'">Add Skills</button>
     </li>
     <li>
-        <button onclick="window.location.href='{{ url_for('update_resume') }}'">📄 Update Resume</button>
+        <button onclick="window.location.href='{{ url_for('update_resume') }}'">Update Resume</button>
     </li>
     <li>
-        <button onclick="window.location.href='{{ url_for('submit_complaint') }}'">⚠️ Submit Complaint</button>
+        <button onclick="window.location.href='{{ url_for('submit_complaint') }}'">Submit Complaint</button>
+    </li>
+    <li>
+        <button onclick="window.location.href='{{ url_for('view_jobs') }}'">View All Jobs</button>
+    </li>
+    <li>
+        <button onclick="window.location.href='{{ url_for('matching_jobs') }}'">Jobs Matching My Skills</button>
+    </li>
+    <li>
+        <button onclick="window.location.href='{{ url_for('view_scheduled_interviews') }}'">Scheduled Interviews</button>
     </li>
 </ul>
 
