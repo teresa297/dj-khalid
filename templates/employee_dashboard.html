@@ -1,0 +1,154 @@
+{% block content %}
+<div class="container">
+    <h2>Welcome, {{ session['username'] }}!</h2>
+
+    <!-- Logout button -->
+    <a href="{{ url_for('logout') }}" class="btn btn-danger logout-btn">Logout</a>
+
+    <!-- Navigation buttons -->
+    <ul class="nav-list">
+        <li><button class="nav-btn" onclick="window.location.href='{{ url_for('add_skills') }}'">Add Skills</button></li>
+        <li><button class="nav-btn" onclick="window.location.href='{{ url_for('update_resume') }}'">Update Resume</button></li>
+        <li><button class="nav-btn" onclick="window.location.href='{{ url_for('submit_complaint') }}'">Submit Complaint</button></li>
+        <li><button class="nav-btn" onclick="window.location.href='{{ url_for('view_jobs') }}'">View All Jobs</button></li>
+        <li><button class="nav-btn" onclick="window.location.href='{{ url_for('matching_jobs') }}'">Jobs Matching My Skills</button></li>
+        <li><button class="nav-btn" onclick="window.location.href='{{ url_for('view_scheduled_interviews') }}'">Scheduled Interviews</button></li>
+        <li><button class="nav-btn" onclick="window.location.href='{{ url_for('review') }}'">Review Candidate/Recruiter</button></li>
+        <li><button class="nav-btn" onclick="window.location.href='{{ url_for('view_reviews') }}'">View Reviews</button></li>
+
+    </ul>
+
+    <!-- Flash messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-messages">
+                {% for category, message in messages %}
+                    <p class="flash-message {{ category }}">{{ message }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+</div>
+
+{% endblock %}
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #f4f4f4;
+        margin: 0;
+        padding: 0;
+    }
+
+    .container {
+        width: 80%;
+        max-width: 800px;
+        background: white;
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        margin: 30px auto;
+        text-align: center;
+    }
+
+    h2 {
+        font-size: 24px;
+        color: #333;
+        margin-bottom: 20px;
+    }
+
+    /* Logout button styling */
+    .logout-btn {
+        background-color: #dc3545;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 5px;
+        text-decoration: none;
+        font-size: 16px;
+        position: absolute;
+        top: 20px;
+        right: 20px;
+    }
+
+    .logout-btn:hover {
+        background-color: #c82333;
+    }
+
+    /* Navigation buttons */
+    .nav-list {
+        list-style: none;
+        padding: 0;
+    }
+
+    .nav-list li {
+        margin: 10px 0;
+    }
+
+    .nav-btn {
+        background-color: #007bff;
+        color: white;
+        padding: 12px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+        width: 100%;
+        text-align: left;
+        box-sizing: border-box;
+    }
+
+    .nav-btn:hover {
+        background-color: #0056b3;
+    }
+
+    /* Flash messages styling */
+    .flash-messages {
+        margin-top: 20px;
+    }
+
+    .flash-message {
+        padding: 15px;
+        margin-bottom: 10px;
+        border-radius: 5px;
+        text-align: center;
+        font-size: 16px;
+        position: relative;
+    }
+
+    .flash-message.success {
+        background-color: #d4edda;
+        color: #155724;
+    }
+
+    .flash-message.warning {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+
+    .flash-message.danger {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+
+    /* Fade-in and fade-out animations for flash messages */
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    .flash-message {
+        animation: fadeIn 0.5s ease-out;
+    }
+</style>
+
+<script>
+    // Automatically hide flash messages after 5 seconds
+    document.addEventListener("DOMContentLoaded", function () {
+        setTimeout(function () {
+            var flashMessages = document.querySelectorAll('.flash-message');
+            flashMessages.forEach(function (message) {
+                message.style.display = 'none';
+            });
+        }, 5000);  // Hide after 5 seconds
+    });
+</script>

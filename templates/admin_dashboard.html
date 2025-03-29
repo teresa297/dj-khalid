@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f8f9fa;
+        }
+        .header {
+            background: #007bff;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            font-size: 24px;
+            font-weight: 600;
+        }
+        .container {
+            max-width: 700px;
+            margin: 30px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        .card {
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .btn {
+            font-size: 16px;
+            font-weight: 500;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            border: none;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+        .btn-danger {
+            background-color: red;
+            border: none;
+        }
+        .btn-danger:hover {
+            background-color: darkred;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        Admin Dashboard
+    </div>
+
+    <div class="container">
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <h3 class="text-center mb-4">Welcome, Admin</h3>
+
+        <div class="card bg-light p-3">
+            <h5>Total Users: {{ total_users }}</h5>
+            <a href="{{ url_for('view_users') }}" class="btn btn-primary w-100 mt-2">View All</a>
+        </div>
+
+        <div class="card bg-light p-3">
+            <h5>Total Recruiters: {{ total_recruiters }}</h5>
+        </div>
+
+        <div class="card bg-light p-3">
+            <h5>Total Candidates: {{ total_candidates }}</h5>
+        </div>
+
+        <div class="card bg-light p-3">
+            <h5>Total Jobs Posted: {{ total_jobs }}</h5>
+        </div>
+
+        <div class="card bg-light p-3">
+            <h5>Open Jobs: {{ open_jobs }}</h5>
+        </div>
+
+        <div class="card bg-light p-3">
+            <h5>Total Applications: {{ total_applications }}</h5>
+        </div>
+
+        <div class="card bg-light p-3">
+            <h5>Scheduled Interviews: {{ scheduled_interviews }}</h5>
+        </div>
+
+        <div class="card bg-light p-3">
+            <h5>Recent Complaints</h5>
+            <ul class="list-group list-group-flush">
+                {% for complaint in recent_complaints %}
+                    <li class="list-group-item">{{ complaint[1] }} - <strong>Status:</strong> {{ complaint[2] }}</li>
+                {% endfor %}
+            </ul>
+            <a href="{{ url_for('view_complaints') }}" class="btn btn-primary w-100 mt-2">Manage Complaints</a>
+        </div>
+
+        <div class="text-center mt-4">
+            <a href="{{ url_for('logout') }}" class="btn btn-danger w-100">Logout</a>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

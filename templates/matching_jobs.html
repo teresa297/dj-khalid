@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matching Jobs</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f4f4f4;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 30px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            color: #333;
+            text-align: center;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+        .no-jobs {
+            color: red;
+            font-weight: bold;
+            margin-top: 10px;
+            text-align: center;
+        }
+        .back-btn {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            text-align: center;
+            display: block;
+            width: 100%;
+            max-width: 200px;
+            margin: 20px auto;
+        }
+        .back-btn:hover {
+            background-color: #0056b3;
+        }
+
+        /* Flash message styling */
+        .flash-message {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            text-align: center;
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 350px;
+            display: none;
+            animation: fadeIn 3s ease-out, fadeOut 3s ease-in 4s;
+        }
+        .flash-message.success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .flash-message.warning {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        /* Fade in and fade out animation */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Perfectly Matching Jobs</h2>
+        
+        {% if perfect_match_jobs %}
+            <table>
+                <tr>
+                    <th>ID</th>
+                    <th>Title</th>
+                    <th>Description</th>
+                    <th>Type</th>
+                    <th>Salary</th>
+                    <th>Employer</th>
+                    <th>Apply</th>
+                </tr>
+                {% for job in perfect_match_jobs %}
+                    <tr>
+                        <td>{{ job[0] }}</td>
+                        <td>{{ job[1] }}</td>
+                        <td>{{ job[2] }}</td>
+                        <td>{{ job[3] }}</td>
+                        <td>{{ job[4] }}</td>
+                        <td>{{ job[5] }}</td>
+                        <td>
+                            <a href="{{ url_for('apply_job', job_id=job[0]) }}" style="color: green; text-decoration: underline;">Apply</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </table>
+        {% else %}
+            <p class="no-jobs">No perfect matches found.</p>
+        {% endif %}
+
+        <h2>Jobs Matching At Least One Skill</h2>
+
+        {% if partial_match_jobs %}
+            <table>
+                <tr>
+                    <th>Job ID</th>
+                    <th>Description</th>
+                    <th>Type</th>
+                    <th>Employer</th>
+                    <th>Apply</th>
+                </tr>
+                {% for job in partial_match_jobs %}
+                    <tr>
+                        <td>{{ job[0] }}</td>
+                        <td>{{ job[1] }}</td>
+                        <td>{{ job[2] }}</td>
+                        <td>{{ job[3] }}</td>
+                        <td>
+                            <form action="{{ url_for('apply_job', job_id=job[0]) }}" method="POST">
+                                <button type="submit" style="color: green; background: none; border: none; cursor: pointer; text-decoration: underline;">
+                                    Apply
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </table>
+        {% else %}
+            <p class="no-jobs">No partial matches found.</p>
+        {% endif %}
+
+        <a href="{{ url_for('employee_dashboard') }}" class="back-btn">Back to Dashboard</a>
+    </div>
+
+    <!-- Flash message container -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-message">
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <script>
+        // Display flash message as pop-up
+        document.addEventListener("DOMContentLoaded", function () {
+            var flashMessages = document.querySelectorAll('.flash-message');
+            flashMessages.forEach(function (message) {
+                message.style.display = 'block';
+                setTimeout(function () {
+                    message.style.display = 'none';
+                }, 7000); // Remove message after 7 seconds
+            });
+        });
+    </script>
+</body>
+</html>

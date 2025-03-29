@@ -1,0 +1,138 @@
+{% block content %}
+<div class="container">
+    <h2>Select Your Skills</h2>
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-messages">
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+
+    <form method="POST" class="skills-form">
+        <label for="skills" class="form-label">Choose your skills:</label><br>
+        <select id="skills" name="skills" multiple required class="form-select">
+            {% for skill in skills %}
+                <option value="{{ skill[0] }}">{{ skill[1] }}</option>
+            {% endfor %}
+        </select>
+        <br>
+        <button type="submit" class="btn btn-primary">Add Skills</button>
+    </form>
+</div>
+
+
+<link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        $('#skills').select2({
+            placeholder: "Select skills",
+            allowClear: true
+        });
+    });
+</script>
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 0;
+    }
+
+    .container {
+        max-width: 800px;
+        margin: 30px auto;
+        padding: 20px;
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        text-align: center;
+    }
+
+    h2 {
+        color: #333;
+        margin-bottom: 20px;
+        font-size: 24px;
+    }
+
+    .form-label {
+        font-size: 16px;
+        margin-bottom: 10px;
+        color: #333;
+        text-align: left;
+        display: inline-block;
+    }
+
+    .form-select {
+        width: 100%;
+        padding: 12px 20px;
+        margin-top: 10px;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+        font-size: 16px;
+        color: #333;
+    }
+
+    .btn {
+        background-color: #007bff;
+        color: white;
+        padding: 12px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+        margin-top: 20px;
+    }
+
+    .btn:hover {
+        background-color: #0056b3;
+    }
+
+    .flash-messages {
+        margin-bottom: 20px;
+    }
+
+    .alert {
+        padding: 15px;
+        border-radius: 5px;
+        margin: 10px 0;
+        font-size: 16px;
+        text-align: center;
+    }
+
+    .alert.success {
+        background-color: #d4edda;
+        color: #155724;
+    }
+
+    .alert.warning {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+
+    .alert.danger {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+
+   
+    .select2-container .select2-selection--multiple {
+        padding: 10px;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+    }
+
+    .select2-container--default .select2-selection--multiple .select2-selection__rendered {
+        color: #333;
+    }
+</style>
+
+{% endblock %}

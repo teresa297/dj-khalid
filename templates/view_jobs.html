@@ -1,0 +1,196 @@
+{% block content %}
+<div class="container">
+    <h2>Available Jobs</h2>
+
+    <!-- Flash messages for success, danger, or warning -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="flash-message {{ category }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <!-- Sorting options -->
+    <form method="GET" action="{{ url_for('view_jobs') }}" class="sort-form">
+        <label for="sort_by">Sort by:</label>
+        <select name="sort_by" id="sort_by" onchange="this.form.submit()">
+            <option value="date" {% if sort_by == 'date' %}selected{% endif %}>Newest</option>
+            <option value="salary" {% if sort_by == 'salary' %}selected{% endif %}>Salary</option>
+            <option value="title" {% if sort_by == 'title' %}selected{% endif %}>Title</option>
+        </select>
+    </form>
+
+    <!-- Job Listings -->
+    <table class="job-table">
+        <tr>
+            <th>Title</th>
+            <th>Description</th>
+            <th>Type</th>
+            <th>Salary</th>
+            <th>Employer</th>
+            <th>Action</th>
+        </tr>
+        {% for job in jobs %}
+        <tr>
+            <td>{{ job[1] }}</td>  <!-- Title -->
+            <td>{{ job[2] }}</td>  <!-- Description -->
+            <td>{{ job[3] }}</td>  <!-- Type -->
+            <td>₹{{ job[4] }}</td>  <!-- Salary -->
+            <td>{{ job[5] }}</td>  <!-- Employer -->
+            <td>
+                <form action="{{ url_for('apply_job', job_id=job[0]) }}" method="POST">
+                    <button type="submit" class="apply-button">
+                        Apply
+                    </button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+
+{% endblock %}
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #f4f4f4;
+        margin: 0;
+        padding: 0;
+    }
+
+    /* Flash message styling */
+    .flash-message {
+        background-color: #f8d7da;
+        color: #721c24;
+        padding: 15px;
+        margin: 10px 0;
+        border-radius: 5px;
+        text-align: center;
+        position: absolute;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 90%;
+        max-width: 350px;
+        display: none;
+        animation: fadeIn 3s ease-out, fadeOut 3s ease-in 4s;
+    }
+    .flash-message.success {
+        background-color: #d4edda;
+        color: #155724;
+    }
+    .flash-message.warning {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+
+    /* Container styling for centering */
+    .container {
+        width: 80%;
+        max-width: 1000px;
+        background: white;
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        margin: 30px auto;
+        text-align: center;
+    }
+
+    h2 {
+        color: #333;
+        font-size: 24px;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    /* Sorting form styling */
+    .sort-form {
+        margin-bottom: 20px;
+    }
+
+    .sort-form label {
+        font-size: 14px;
+        color: #333;
+        margin-right: 10px;
+    }
+
+    .sort-form select {
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        font-size: 14px;
+        color: #333;
+    }
+
+    /* Table Styling */
+    .job-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+    .job-table th, .job-table td {
+        padding: 10px;
+        border: 1px solid #ddd;
+        text-align: left;
+    }
+
+    .job-table th {
+        background-color: #007bff;
+        color: white;
+    }
+
+    .job-table td {
+        background-color: #fff;
+    }
+
+    /* Apply button styling */
+    .apply-button {
+        color: green;
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 16px;
+        text-decoration: underline;
+    }
+
+    .apply-button:hover {
+        color: #0056b3;
+    }
+
+    /* Fade in and fade out animation */
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+
+    @keyframes fadeOut {
+        from {
+            opacity: 1;
+        }
+        to {
+            opacity: 0;
+        }
+    }
+</style>
+
+<script>
+    // Display flash message as pop-up
+    document.addEventListener("DOMContentLoaded", function () {
+        var flashMessages = document.querySelectorAll('.flash-message');
+        flashMessages.forEach(function (message) {
+            message.style.display = 'block';
+            setTimeout(function () {
+                message.style.display = 'none';
+            }, 7000); // Remove message after 7 seconds
+        });
+    });
+</script>

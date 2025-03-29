@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employer Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            width: 80%;
+            max-width: 800px;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin: 50px auto;
+            text-align: center;
+        }
+
+        h2 {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        /* Logout button */
+        .logout-btn {
+            background-color: #dc3545;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 16px;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+
+        .logout-btn:hover {
+            background-color: #c82333;
+        }
+
+        /* Navigation buttons */
+        .nav-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .nav-list li {
+            margin: 10px 0;
+        }
+
+        .nav-btn {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            text-align: left;
+            box-sizing: border-box;
+        }
+
+        .nav-btn:hover {
+            background-color: #0056b3;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- Logout Button -->
+    <a href="{{ url_for('logout') }}" class="btn logout-btn">Logout</a>
+
+    <!-- Dashboard Container -->
+    <div class="container">
+        <h2>Welcome, Employer</h2>
+
+        <!-- Navigation Buttons -->
+        <ul class="nav-list">
+            <li><button class="nav-btn" onclick="window.location.href='{{ url_for('view_applicants') }}'">View Job Applicants</button></li>
+            <li><button class="nav-btn" onclick="window.location.href='{{ url_for('post_job') }}'">Post a New Job</button></li>
+            <li><button class="nav-btn" onclick="window.location.href='{{ url_for('submit_complaint') }}'">Submit Complaint</button></li>
+            <li><button class="nav-btn" onclick="window.location.href='{{ url_for('review') }}'">Review Candidate/Recruiter</button></li>
+            <li><button class="nav-btn" onclick="window.location.href='{{ url_for('view_reviews') }}'">View Reviews</button></li>
+            <li><button class="nav-btn" onclick="window.location.href='{{ url_for('view_interviews') }}'">View Interviews</button></li>
+            
+        </ul>
+    </div>
+
+</body>
+</html>
